@@ -6,7 +6,7 @@ import numpy as np
 from ipycanvas import Canvas
 
 
-def ensure_correct_image_shape(image):
+def ensure_correct_image_shape(image: np.ndarray):
     """This function ensures that the shape is always (F, W, H, C), where F is the
     number of frames, W is width, H is height, and C is the number of channels. The
     number of channels can either be 3 (RGB) or 4 (RGBA).
@@ -37,6 +37,13 @@ def ensure_correct_image_shape(image):
         image.ndim == 4
     ), "Invalid image shape. See ensure_correct_image_shape docstring for valid image shapes."
     return image
+
+
+def normalize(image: np.ndarray):
+    """Normalize image to the range [0, 255]"""
+    image = image - image.min()
+    image = image / image.max()
+    return image * 255
 
 
 @dataclass
@@ -78,7 +85,7 @@ class Comparison:
         # Set up a hidden canvas and draw each image to be compared
         self.canvases = []
         for im in self.images:
-            im = ensure_correct_image_shape(im)
+            im = ensure_correct_image_shape(normalize(im))
             num_frames, width, height, num_channels = im.shape
             canvas = Canvas(width=width, height=height)
             canvas.put_image_data(im[self.state["frame"]])
@@ -121,7 +128,7 @@ class Comparison:
 
     def update_image(self, index: int, new_image: np.ndarray):
         "Set the image at index to new_image and redraw the canvas."
-        new_image = ensure_correct_image_shape(new_image)
+        new_image = ensure_correct_image_shape(normalize(new_image))
         self.images[index] = new_image
         self.canvases[index].put_image_data(new_image[self.state["frame"]])
         self.draw_canvas()
@@ -147,10 +154,13 @@ class Comparison:
 
     def draw_canvas(self):
         if self.state["diffing"]:
-            im1 = ensure_correct_image_shape(self.images[self.state["image"]])
-            im2 = ensure_correct_image_shape(self.images[self.state["prev_image"]])
-            diff = im1[self.state["frame"]] - im2[self.state["frame"]]
-            diff = (diff + 255) / 2
+            im1 = ensure_correct_image_shape(
+                normalize(self.images[self.state["image"]])
+            )
+            im2 = ensure_correct_image_shape(
+                normalize(self.images[self.state["prev_image"]])
+            )
+            diff = (im1[self.state["frame"]] - im2[self.state["frame"]] + 255) / 2
             self.diffing_canvas.width = diff.shape[0]
             self.diffing_canvas.height = diff.shape[1]
             self.diffing_canvas.put_image_data(diff)
@@ -158,7 +168,9 @@ class Comparison:
             self.image_label.value = f"Diffing images {self.state['image']+1} and {self.state['prev_image']+1}"
         else:
             copy_canvas = self.canvases[self.state["image"]]
-            self.image_label.value = f"Image {self.state['image']+1} of {len(self.images)}"
+            self.image_label.value = (
+                f"Image {self.state['image']+1} of {len(self.images)}"
+            )
 
         self.main_canvas.draw_image(
             copy_canvas, 0, 0, self.main_canvas.width, self.main_canvas.height
