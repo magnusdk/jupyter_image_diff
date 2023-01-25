@@ -7,21 +7,21 @@ from ipycanvas import Canvas
 
 
 def ensure_correct_image_shape(image: np.ndarray):
-    """This function ensures that the shape is always (F, W, H, C), where F is the
-    number of frames, W is width, H is height, and C is the number of channels. The
+    """This function ensures that the shape is always (F, H, W, C), where F is the
+    number of frames, H is height, W is width, and C is the number of channels. The
     number of channels can either be 3 (RGB) or 4 (RGBA).
 
     Allowed input shapes are:
-    - (W, H)        # Just a 2D matrix
-    - (W, H, 3)     # A 2D matrix with RGB channels
-    - (W, H, 4)     # A 2D matrix with RGBA channels
-    - (F, W, H)     # A set of frames of 2D matrices
-    - (F, W, H, 3)  # A set of frames of 2D matrices with RGB channels
-    - (F, W, H, 4)  # A set of frames of 2D matrices with RGBA channels
+    - (H, W)        # Just a 2D matrix
+    - (H, W, 3)     # A 2D matrix with RGB channels
+    - (H, W, 4)     # A 2D matrix with RGBA channels
+    - (F, H, W)     # A set of frames of 2D matrices
+    - (F, H, W, 3)  # A set of frames of 2D matrices with RGB channels
+    - (F, H, W, 4)  # A set of frames of 2D matrices with RGBA channels
 
-    After ensuring correct image shape the shape will be (F, W, H, C). Note that if the
-    height is 3 or 4 it may be confused with the channels dimension. If your image is
-    3 or 4 pixels tall, you will have to add a channel dimension yourself.
+    After ensuring correct image shape the shape will be (F, H, W, C). Note that if the
+    width is 3 or 4 it may be confused with the channels dimension. If your image is
+    3 or 4 pixels wide, you will have to add a channel dimension yourself.
     """
     # Check if image has channel data
     if image.shape[-1] not in (3, 4):
@@ -86,7 +86,7 @@ class Comparison:
         self.canvases = []
         for im in self.images:
             im = ensure_correct_image_shape(normalize(im))
-            num_frames, width, height, num_channels = im.shape
+            num_frames, height, width, num_channels = im.shape
             canvas = Canvas(width=width, height=height)
             canvas.put_image_data(im[self.state["frame"]])
             self.canvases.append(canvas)
@@ -161,8 +161,8 @@ class Comparison:
                 normalize(self.images[self.state["prev_image"]])
             )
             diff = (im1[self.state["frame"]] - im2[self.state["frame"]] + 255) / 2
-            self.diffing_canvas.width = diff.shape[0]
-            self.diffing_canvas.height = diff.shape[1]
+            self.diffing_canvas.height = diff.shape[0]
+            self.diffing_canvas.width = diff.shape[1]
             self.diffing_canvas.put_image_data(diff)
             copy_canvas = self.diffing_canvas
             self.image_label.value = f"Diffing images {self.state['image']+1} and {self.state['prev_image']+1}"
