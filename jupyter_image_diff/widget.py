@@ -155,12 +155,10 @@ class Comparison:
             self.diffing_canvas.height = diff.shape[1]
             self.diffing_canvas.put_image_data(diff)
             copy_canvas = self.diffing_canvas
-
-            
             self.image_label.value = f"Diffing images {self.state['image']+1} and {self.state['prev_image']+1}"
         else:
-            self.image_label.value = f"Image {self.state['image']+1} of {len(self.images)}"
             copy_canvas = self.canvases[self.state["image"]]
+            self.image_label.value = f"Image {self.state['image']+1} of {len(self.images)}"
 
         self.main_canvas.draw_image(
             copy_canvas, 0, 0, self.main_canvas.width, self.main_canvas.height
