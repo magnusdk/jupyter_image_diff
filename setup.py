@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="jupyter_image_compare",
+    name="jupyter_image_diff",
     version="0.1.0",
     description="Fast comparison of Numpy array images in Jupyter notebooks",
     author="Magnus Dalen Kvalevåg",
